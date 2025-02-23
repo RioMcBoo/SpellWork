@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public sealed class SpellMissileEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public int SpellID;
         public byte Flags;
         public float DefaultPitchMin;

@@ -865,7 +865,7 @@ namespace SpellWork.Spell
         private static void AuraModTypeName(RichTextBox rtb, SpellEffectEntry effect)
         {
             var aura = (AuraType)effect.EffectAura;
-            var miscA = effect.EffectMiscValue[0];
+            var misc = effect.EffectMiscValue[0];
             var miscB = effect.EffectMiscValue[1];
 
             if (effect.EffectAura == 0)
@@ -879,13 +879,13 @@ namespace SpellWork.Spell
 
             rtb.AppendFormat("Aura Id {0:D} ({0})", aura);
             rtb.AppendFormat(", value = {0}", effect.EffectBasePoints);
-            rtb.AppendFormat(", misc = {0} (", miscA);
+            rtb.AppendFormat(", misc = {0} (", misc);
 
             switch (aura)
             {
                 case AuraType.SPELL_AURA_CONVERT_CONSUMED_RUNE:
                 case AuraType.SPELL_AURA_CONVERT_RUNE:
-                    rtb.Append((RuneType)miscA);
+                    rtb.Append((RuneType)misc);
                     break;
                 case AuraType.SPELL_AURA_MOD_ADDITIONAL_POWER_COST:
                 case AuraType.SPELL_AURA_MOD_MAX_POWER:
@@ -898,8 +898,10 @@ namespace SpellWork.Spell
                 case AuraType.SPELL_AURA_PREVENT_REGENERATE_POWER:
                 case AuraType.SPELL_AURA_TRIGGER_SPELL_ON_POWER_AMOUNT:
                 case AuraType.SPELL_AURA_TRIGGER_SPELL_ON_POWER_PCT:
-                    rtb.Append((Powers)miscA);
+                    rtb.Append((Powers)misc);
                     break;
+                case AuraType.SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT:
+                case AuraType.SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE:
                 case AuraType.SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL:
                 case AuraType.SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER:
                 case AuraType.SPELL_AURA_MOD_POWER_COST_SCHOOL:
@@ -914,7 +916,7 @@ namespace SpellWork.Spell
                 case AuraType.SPELL_AURA_MOD_DAMAGE_DONE:
                 case AuraType.SPELL_AURA_MOD_HEALING_DONE:
                 case AuraType.SPELL_AURA_MOD_SPELL_HIT_CHANCE:
-                    rtb.Append((SpellSchoolMask)miscA);
+                    rtb.Append((SpellSchoolMask)misc);
                     break;
                 case AuraType.SPELL_AURA_MOD_ARMOR_PCT_FROM_STAT:
                 case AuraType.SPELL_AURA_MOD_MANA_REGEN_FROM_STAT:
@@ -929,20 +931,20 @@ namespace SpellWork.Spell
                 case AuraType.SPELL_AURA_MOD_STAT_BONUS_PCT:
                 case AuraType.SPELL_AURA_MOD_SUPPORT_STAT:
                 case AuraType.SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
-                    rtb.Append((UnitMods)miscA);
+                    rtb.Append((UnitMods)misc);
                     break;
                 case AuraType.SPELL_AURA_MOD_COMBAT_RATING_FROM_COMBAT_RATING:
                 case AuraType.SPELL_AURA_MOD_RATING:
                 case AuraType.SPELL_AURA_MOD_RATING_PCT:
-                    rtb.Append((CombatRatingMask)miscA);
+                    rtb.Append((CombatRatingMask)misc);
                     break;
                 case AuraType.SPELL_AURA_ADD_FLAT_MODIFIER:
                 case AuraType.SPELL_AURA_ADD_PCT_MODIFIER:
-                    rtb.Append((SpellModOp)miscA);
+                    rtb.Append((SpellModOp)misc);
                     break;
                 // TODO: more case
                 default:
-                    rtb.Append(miscA);
+                    rtb.Append(misc);
                     break;
             }
 
@@ -971,16 +973,16 @@ namespace SpellWork.Spell
             switch (aura)
             {
                 case AuraType.SPELL_AURA_OVERRIDE_SPELLS:
-                    if (!DBC.DBC.OverrideSpellData.ContainsKey(miscA))
+                    if (!DBC.DBC.OverrideSpellData.ContainsKey(misc))
                     {
                         rtb.SetStyle(Color.Red, FontStyle.Bold);
-                        rtb.AppendFormatLine("Cannot find key {0} in OverrideSpellData.dbc", (uint)miscA);
+                        rtb.AppendFormatLine("Cannot find key {0} in OverrideSpellData.dbc", (uint)misc);
                     }
                     else
                     {
                         rtb.AppendLine();
                         rtb.SetStyle(Color.DarkRed, FontStyle.Bold);
-                        var @override = DBC.DBC.OverrideSpellData[miscA];
+                        var @override = DBC.DBC.OverrideSpellData[misc];
                         for (var i = 0; i < 10; ++i)
                         {
                             if (@override.Spells[i] == 0)
@@ -988,7 +990,7 @@ namespace SpellWork.Spell
 
                             rtb.SetStyle(Color.DarkBlue, FontStyle.Regular);
                             rtb.AppendFormatLine("\t - #{0} ({1}) {2}", i + 1, @override.Spells[i],
-                                DBC.DBC.SpellInfoStore.ContainsKey((int)@override.Spells[i]) ? DBC.DBC.SpellInfoStore[(int)@override.Spells[i]].Name : "?????");
+                                DBC.DBC.SpellInfoStore.ContainsKey(@override.Spells[i]) ? DBC.DBC.SpellInfoStore[@override.Spells[i]].Name : "?????");
                         }
                         rtb.AppendLine();
                     }
@@ -996,7 +998,7 @@ namespace SpellWork.Spell
                 case AuraType.SPELL_AURA_SCREEN_EFFECT:
                     rtb.SetStyle(Color.DarkBlue, FontStyle.Bold);
                     rtb.AppendFormatLine("ScreenEffect: {0}",
-                        DBC.DBC.ScreenEffect.ContainsKey(miscA) ? DBC.DBC.ScreenEffect[miscA].Name : "?????");
+                        DBC.DBC.ScreenEffect.ContainsKey(misc) ? DBC.DBC.ScreenEffect[misc].Name : "?????");
                     break;
             }
         }
@@ -1028,6 +1030,53 @@ namespace SpellWork.Spell
             }
         }
 
+        private void AppendSpellVisualInfo(RichTextBox rtb)
+        {
+            SpellVisualEntry visualData;
+            if (!DBC.DBC.SpellVisual.TryGetValue(_spell.SpellVisual[0], out visualData))
+                return;
+
+            SpellMissileEntry missileEntry;
+            SpellMissileMotionEntry missileMotionEntry;
+            var hasMissileEntry = DBC.DBC.SpellMissile.TryGetValue(visualData.Id, out missileEntry);
+            var hasMissileMotion = DBC.DBC.SpellMissileMotion.TryGetValue(visualData.Id, out missileMotionEntry);
+
+            if (!hasMissileEntry && !hasMissileMotion)
+                return;
+
+            rtb.AppendLine(Separator);
+            rtb.SetBold();
+            rtb.AppendLine("Missile data");
+            rtb.SetDefaultStyle();
+
+            // Missile Model Data.
+            if (hasMissileEntry)
+            {
+                rtb.AppendFormatLine("Missile Model ID: {0}", visualData.SpellVisualMissileSetID);
+                rtb.AppendFormatLine("Missile attachment: {0}", visualData.MissileAttachment);
+                rtb.AppendFormatLine("Missile cast offset: X:{0} Y:{1} Z:{2}", visualData.MissileCastOffsetX, visualData.MissileCastOffsetY, visualData.MissileCastOffsetZ);
+                rtb.AppendFormatLine("Missile impact offset: X:{0} Y:{1} Z:{2}", visualData.MissileImpactOffsetX, visualData.MissileImpactOffsetY, visualData.MissileImpactOffsetZ);
+                rtb.AppendFormatLine("MissileEntry ID: {0}", missileEntry.ID);
+                rtb.AppendFormatLine("Collision Radius: {0}", missileEntry.CollisionRadius);
+                rtb.AppendFormatLine("Default Pitch: {0} - {1}", missileEntry.DefaultPitchMin, missileEntry.DefaultPitchMax);
+                rtb.AppendFormatLine("Random Pitch: {0} - {1}", missileEntry.RandomizePitchMax, missileEntry.RandomizePitchMax);
+                rtb.AppendFormatLine("Default Speed: {0} - {1}", missileEntry.DefaultSpeedMin, missileEntry.DefaultSpeedMax);
+                rtb.AppendFormatLine("Randomize Speed: {0} - {1}", missileEntry.RandomizeSpeedMin, missileEntry.RandomizeSpeedMax);
+                rtb.AppendFormatLine("Gravity: {0}", missileEntry.Gravity);
+                rtb.AppendFormatLine("Maximum duration:", missileEntry.MaxDuration);
+                rtb.AppendLine("");
+            }
+
+            // Missile Motion Data.
+            if (hasMissileMotion)
+            {
+                rtb.AppendFormatLine("Missile motion: {0}", missileMotionEntry.Name);
+                rtb.AppendFormatLine("Missile count: {0}", missileMotionEntry.MissileCount);
+                rtb.AppendLine("Missile Script body:");
+                rtb.AppendText(missileMotionEntry.Script);
+            }
+        }
+
         private void AppendSpellVisualInfo()
         {
             /*SpellVisualEntry visualData;
@@ -1054,7 +1103,7 @@ namespace SpellWork.Spell
                 _rtb.AppendFormatLine("Missile attachment: {0}", visualData.MissileAttachment);
                 _rtb.AppendFormatLine("Missile cast offset: X:{0} Y:{1} Z:{2}", visualData.MissileCastOffsetX, visualData.MissileCastOffsetY, visualData.MissileCastOffsetZ);
                 _rtb.AppendFormatLine("Missile impact offset: X:{0} Y:{1} Z:{2}", visualData.MissileImpactOffsetX, visualData.MissileImpactOffsetY, visualData.MissileImpactOffsetZ);
-                _rtb.AppendFormatLine("MissileEntry ID: {0}", missileEntry.Id);
+                _rtb.AppendFormatLine("MissileEntry ID: {0}", missileEntry.ID);
                 _rtb.AppendFormatLine("Collision Radius: {0}", missileEntry.CollisionRadius);
                 _rtb.AppendFormatLine("Default Pitch: {0} - {1}", missileEntry.DefaultPitchMin, missileEntry.DefaultPitchMax);
                 _rtb.AppendFormatLine("Random Pitch: {0} - {1}", missileEntry.RandomizePitchMax, missileEntry.RandomizePitchMax);
