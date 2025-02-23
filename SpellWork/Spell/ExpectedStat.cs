@@ -1,4 +1,5 @@
-﻿using SpellWork.DBC.Structures;
+﻿using WOWClient.DB2.Structures;
+using WOWClient.Entries;
 using System;
 using System.Linq;
 
@@ -8,7 +9,7 @@ namespace SpellWork.Spell
     {
         public static float Evaluate(ExpectedStatType stat, uint level, int expansion, int contentTuningId, int mythicPlusSeasonId, Classes unitClass)
         {
-            var expectedStat = DBC.DBC.ExpectedStat.Values
+            var expectedStat = WowData.ExpectedStat.Values
                 .Where(es => es.Lvl == level && (es.ExpansionID == expansion || es.ExpansionID == -2))
                 .OrderByDescending(es => es.ExpansionID)
                 .FirstOrDefault();
@@ -20,16 +21,16 @@ namespace SpellWork.Spell
             switch (unitClass)
             {
                 case Classes.CLASS_WARRIOR:
-                    classMod = DBC.DBC.ExpectedStatMod[4];
+                    classMod = WowData.ExpectedStatMod[4];
                     break;
                 case Classes.CLASS_PALADIN:
-                    classMod = DBC.DBC.ExpectedStatMod[2];
+                    classMod = WowData.ExpectedStatMod[2];
                     break;
                 case Classes.CLASS_ROGUE:
-                    classMod = DBC.DBC.ExpectedStatMod[3];
+                    classMod = WowData.ExpectedStatMod[3];
                     break;
                 case Classes.CLASS_MAGE:
-                    classMod = DBC.DBC.ExpectedStatMod[1];
+                    classMod = WowData.ExpectedStatMod[1];
                     break;
                 default:
                     break;
@@ -38,7 +39,7 @@ namespace SpellWork.Spell
             //MythicPlusSeasonEntry currentSeason = null;
             //DBC.DBC.MythicPlusSeason.TryGetValue(mythicPlusSeasonId, out currentSeason);
 
-            var contentTuningMods = DBC.DBC.ContentTuning.Values
+            var contentTuningMods = WowData.ContentTuning.Values
                 .Where(ctxe => ctxe.Id == contentTuningId)
                 //.Where(ctxe =>
                 //{
@@ -52,7 +53,7 @@ namespace SpellWork.Spell
 
                 //    return true;
                 //})
-                .Select(ctxe => DBC.DBC.ExpectedStatMod[ctxe.Id]);
+                .Select(ctxe => WowData.ExpectedStatMod[ctxe.Id]);
 
             Func<ExpectedStatModEntry, float> modValueExtractor = null;
             float value = 0.0f;

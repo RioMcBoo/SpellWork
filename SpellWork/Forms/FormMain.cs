@@ -1,5 +1,4 @@
-﻿using SpellWork.Database;
-using SpellWork.Extensions;
+﻿using SpellWork.Extensions;
 using SpellWork.Filtering;
 using SpellWork.Spell;
 using System;
@@ -11,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using WOWClient.Entries;
 
 namespace SpellWork.Forms
 {
@@ -21,7 +21,7 @@ namespace SpellWork.Forms
             InitializeComponent();
             splitContainer3.SplitterDistance = 200;
 
-            Text = DBC.DBC.Version;
+            Text = WowData.Version;
 
             _cbSpellFamilyName.SetEnumValues<SpellFamilyNames>("SpellFamilyName");
             _cbSpellAura.SetEnumValues<AuraType>("Aura");
@@ -143,9 +143,9 @@ namespace SpellWork.Forms
             var ret = scalingForm.ShowDialog(this);
             if (ret == DialogResult.OK)
             {
-                DBC.DBC.SelectedLevel = scalingForm.SelectedLevel;
-                DBC.DBC.SelectedItemLevel = scalingForm.SelectedItemLevel;
-                DBC.DBC.SelectedMapDifficulty = scalingForm.SelectedMapDifficulty;
+                WowData.SelectedLevel = scalingForm.SelectedLevel;
+                WowData.SelectedItemLevel = scalingForm.SelectedItemLevel;
+                WowData.SelectedMapDifficulty = scalingForm.SelectedMapDifficulty;
                 switch (tabControl1.SelectedIndex)
                 {
                     case 0:
@@ -203,7 +203,7 @@ namespace SpellWork.Forms
             var ic = _tbSearchIcon.Text.ToUInt32();
             var at = _tbSearchAttributes.Text.ToUInt32();
 
-            _spellList = (from spellInfo in DBC.DBC.SpellInfoStore.Values
+            _spellList = (from spellInfo in WowData.SpellInfoStore.Values
                           where
                               ((id == 0 || spellInfo.ID == id) && (ic == 0 || spellInfo.SpellIconFileDataID == ic) &&
                                (at == 0 || (spellInfo.Attributes & at) != 0 || (spellInfo.AttributesEx & at) != 0 ||
@@ -274,7 +274,7 @@ namespace SpellWork.Forms
             var filterValFn1 = FilterFactory.CreateFilterFunc<SpellInfo>(field1, advVal1, field1Ct);
             var filterValFn2 = FilterFactory.CreateFilterFunc<SpellInfo>(field2, advVal2, field2Ct);
 
-            _spellList = DBC.DBC.SpellInfoStore.Values.Where(
+            _spellList = WowData.SpellInfoStore.Values.Where(
                 spell => (!bFamilyNames || spell.SpellFamilyName == fFamilyNames) &&
                          (!bSpellEffect || spell.HasEffect((SpellEffects)fSpellEffect)) &&
                          (!bSpellAura || spell.HasAura((AuraType)fSpellAura)) &&
@@ -302,7 +302,7 @@ namespace SpellWork.Forms
         private void NewProcSpellIdClick(object sender, EventArgs e)
         {
             var spellId = int.Parse(_tbNewProcSpellId.Text);
-            var spell = DBC.DBC.SpellInfoStore[spellId];
+            var spell = WowData.SpellInfoStore[spellId];
             var proc = new SpellProcEntry()
             {
                 SpellId = spellId,
@@ -321,7 +321,7 @@ namespace SpellWork.Forms
 
         private void NewProcSpellIdTextChanged(object sender, EventArgs e)
         {
-            _bNewProcSpellId.Enabled = int.TryParse(((TextBox)sender).Text, out var spellId) && DBC.DBC.SpellInfoStore.ContainsKey(spellId);
+            _bNewProcSpellId.Enabled = int.TryParse(((TextBox)sender).Text, out var spellId) && WowData.SpellInfoStore.ContainsKey(spellId);
         }
 
         private void CbProcSpellFamilyNameSelectedIndexChanged(object sender, EventArgs e)
@@ -338,7 +338,7 @@ namespace SpellWork.Forms
         private void TvFamilyTreeAfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node.Level > 0)
-                SetProcAttribute(DBC.DBC.SpellInfoStore[e.Node.Name.ToInt32()]);
+                SetProcAttribute(WowData.SpellInfoStore[e.Node.Name.ToInt32()]);
         }
 
         private void LvProcSpellListSelectedIndexChanged(object sender, EventArgs e)
@@ -353,7 +353,7 @@ namespace SpellWork.Forms
         private void LvProcAdditionalInfoSelectedIndexChanged(object sender, EventArgs e)
         {
             if (_lvProcAdditionalInfo.SelectedIndices.Count > 0)
-                SetProcAttribute(DBC.DBC.SpellInfoStore[_lvProcAdditionalInfo.SelectedItems[0].SubItems[0].Text.ToInt32()]);
+                SetProcAttribute(WowData.SpellInfoStore[_lvProcAdditionalInfo.SelectedItems[0].SubItems[0].Text.ToInt32()]);
         }
 
         private void ClbSchoolsSelectedIndexChanged(object sender, EventArgs e)
@@ -414,7 +414,7 @@ namespace SpellWork.Forms
         {
             var id = _tbProcSeach.Text.ToUInt32();
 
-            _spellProcList = (from spell in DBC.DBC.SpellInfoStore.Values
+            _spellProcList = (from spell in WowData.SpellInfoStore.Values
                               where
                                   (id == 0 || spell.ID == id) &&
                                   (id != 0 || spell.Name.ContainsText(_tbProcSeach.Text))
@@ -442,7 +442,7 @@ namespace SpellWork.Forms
             var bTarget2 = _cbProcTarget2.SelectedIndex != 0;
             var fTarget2 = _cbProcTarget2.SelectedValue.ToInt32();
 
-            _spellProcList = (from spell in DBC.DBC.SpellInfoStore.Values
+            _spellProcList = (from spell in WowData.SpellInfoStore.Values
                               where
                                   (!bFamilyNames || spell.SpellFamilyName == fFamilyNames) &&
                                   (!bSpellEffect || spell.HasEffect((SpellEffects)fSpellEffect)) &&
@@ -479,7 +479,7 @@ namespace SpellWork.Forms
                     .Distinct()
                     .Select(familySpellNode =>
                     {
-                        var spell = DBC.DBC.SpellInfoStore[familySpellNode.Name.ToInt32()];
+                        var spell = WowData.SpellInfoStore[familySpellNode.Name.ToInt32()];
 
                         return new ListViewItem(new[] { familySpellNode.Name, spell.NameAndSubname, spell.Description })
                         {
@@ -499,8 +499,8 @@ namespace SpellWork.Forms
             var spell1 = _tbCompareFilterSpell1.Text.ToInt32();
             var spell2 = _tbCompareFilterSpell2.Text.ToInt32();
 
-            if (DBC.DBC.SpellInfoStore.ContainsKey(spell1) && DBC.DBC.SpellInfoStore.ContainsKey(spell2))
-                SpellCompare.Compare(_rtbCompareSpell1, _rtbCompareSpell2, DBC.DBC.SpellInfoStore[spell1], DBC.DBC.SpellInfoStore[spell2]);
+            if (WowData.SpellInfoStore.ContainsKey(spell1) && WowData.SpellInfoStore.ContainsKey(spell2))
+                SpellCompare.Compare(_rtbCompareSpell1, _rtbCompareSpell2, WowData.SpellInfoStore[spell1], WowData.SpellInfoStore[spell2]);
         }
 
         private void CompareSearch1Click(object sender, EventArgs e)
@@ -600,7 +600,7 @@ namespace SpellWork.Forms
             var compare = _cbBinaryCompare.Checked ? "&" : "=";
 
             var conditions = new List<string>();
-            if (DBC.DBC.SpellInfoStore.ContainsKey(_tbLoadProcSpellId.Text.ToInt32()))
+            if (WowData.SpellInfoStore.ContainsKey(_tbLoadProcSpellId.Text.ToInt32()))
                 conditions.Add($"SpellId = {_tbLoadProcSpellId.Text.ToInt32()}");
 
             if (_cbSqlSpellFamily.SelectedValue.ToInt32() != -1)
@@ -687,7 +687,7 @@ namespace SpellWork.Forms
 
         private void ProcParse(SpellProcEntry proc)
         {
-            var spell = DBC.DBC.SpellInfoStore[Math.Abs(proc.SpellId)];
+            var spell = WowData.SpellInfoStore[Math.Abs(proc.SpellId)];
             ProcInfo.SpellProc = spell;
 
             spell.Write(_rtbProcSpellInfo);

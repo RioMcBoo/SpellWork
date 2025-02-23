@@ -1,7 +1,7 @@
-﻿using SpellWork.DBC.Structures;
+﻿using WOWClient.DB2.Structures;
+using WOWClient.Entries;
+using WOWClient.GameTable.Structures;
 using SpellWork.Extensions;
-using SpellWork.GameTables;
-using SpellWork.GameTables.Structures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using FileDataReader;
 
 namespace SpellWork.Spell
 {
@@ -120,8 +121,8 @@ namespace SpellWork.Spell
         #endregion
 
         #region
-        public int ChargeRecoveryTime => DBC.DBC.SpellCategory.TryGetValue(ChargeCategory, out var category) ? category.ChargeRecoveryTime : 0;
-        public sbyte MaxCharges => DBC.DBC.SpellCategory.TryGetValue(ChargeCategory, out var category) ? category.MaxCharges : (sbyte)0;
+        public int ChargeRecoveryTime => WowData.SpellCategory.TryGetValue(ChargeCategory, out var category) ? category.ChargeRecoveryTime : 0;
+        public sbyte MaxCharges => WowData.SpellCategory.TryGetValue(ChargeCategory, out var category) ? category.MaxCharges : (sbyte)0;
         #endregion
 
         #region SpellShapeshift
@@ -263,7 +264,7 @@ namespace SpellWork.Spell
 
             rtb.SetBold();
             rtb.AppendFormatLine("ID - {0} {1}{2}",
-                ID, NameAndSubname, Scaling != null ? $" (Level {DBC.DBC.SelectedLevel})" : string.Empty);
+                ID, NameAndSubname, Scaling != null ? $" (Level {WowData.SelectedLevel})" : string.Empty);
             rtb.SetDefaultStyle();
 
             rtb.AppendFormatLine(Separator);
@@ -282,13 +283,13 @@ namespace SpellWork.Spell
 
             #region Triggered by ...
             var addline = false;
-            if (DBC.DBC.SpellTriggerStore.ContainsKey(ID))
+            if (WowData.SpellTriggerStore.ContainsKey(ID))
             {
-                foreach (var procSpellId in DBC.DBC.SpellTriggerStore[ID])
+                foreach (var procSpellId in WowData.SpellTriggerStore[ID])
                 {
                     var procname = "Spell Not Found";
-                    if (DBC.DBC.SpellInfoStore.ContainsKey(procSpellId))
-                        procname = DBC.DBC.SpellInfoStore[procSpellId].Name;
+                    if (WowData.SpellInfoStore.ContainsKey(procSpellId))
+                        procname = WowData.SpellInfoStore[procSpellId].Name;
                     rtb.SetStyle(Color.Blue, FontStyle.Bold);
 
                     rtb.AppendFormatLine("Triggered by spell: ({0}) {1}", procSpellId, procname);
@@ -308,7 +309,7 @@ namespace SpellWork.Spell
 
             #region Modified by ...
             foreach (var eff in
-                    from s in DBC.DBC.SpellInfoStore.Values
+                    from s in WowData.SpellInfoStore.Values
                     where s.SpellFamilyName == SpellFamilyName
                     from eff in s.SpellEffectInfoStore
                     where eff != null && ((eff.SpellEffect.EffectSpellClassMask[0] & SpellClassMask[0]) != 0 ||
@@ -319,7 +320,7 @@ namespace SpellWork.Spell
             {
                 rtb.SetStyle(Color.Blue, FontStyle.Bold);
                 rtb.AppendFormatLine("Modified by {0} ({1})",
-                    DBC.DBC.SpellInfoStore[eff.SpellID].Name, eff.SpellID);
+                    WowData.SpellInfoStore[eff.SpellID].Name, eff.SpellID);
             }
             #endregion
 
@@ -385,11 +386,11 @@ namespace SpellWork.Spell
 
             // Skills
             {
-                var query = DBC.DBC.SkillLineAbility.Where(skl => skl.Value.Spell == ID).ToArray();
+                var query = WowData.SkillLineAbility.Where(skl => skl.Value.Spell == ID).ToArray();
                 if (query.Length != 0)
                 {
                     var skill = query.First().Value;
-                    var line = DBC.DBC.SkillLine[skill.SkillLine];
+                    var line = WowData.SkillLine[skill.SkillLine];
 
                     rtb.AppendFormatLine(@"Skill (Id {0}) ""{1}""", skill.SkillLine, line.DisplayName);
                     rtb.AppendFormat("    MinSkillLineRank {0}", skill.MinSkillLineRank);
@@ -487,9 +488,9 @@ namespace SpellWork.Spell
 
             if (CastingTimeIndex != 0)
             {
-                var castTimeEntry = DBC.DBC.SpellCastTimes[CastingTimeIndex];
+                var castTimeEntry = WowData.SpellCastTimes[CastingTimeIndex];
 
-                var level = DBC.DBC.SelectedLevel;
+                var level = WowData.SelectedLevel;
                 if (Scaling != null && level > Scaling.MaxScalingLevel)
                     level = Scaling.MaxScalingLevel;
 
@@ -555,32 +556,32 @@ namespace SpellWork.Spell
 
             if (CasterAuraSpell != 0)
             {
-                if (DBC.DBC.SpellInfoStore.ContainsKey(CasterAuraSpell))
-                    rtb.AppendFormatLine("  Caster Aura Spell ({0}) {1}", CasterAuraSpell, DBC.DBC.SpellInfoStore[CasterAuraSpell].Name);
+                if (WowData.SpellInfoStore.ContainsKey(CasterAuraSpell))
+                    rtb.AppendFormatLine("  Caster Aura Spell ({0}) {1}", CasterAuraSpell, WowData.SpellInfoStore[CasterAuraSpell].Name);
                 else
                     rtb.AppendFormatLine("  Caster Aura Spell ({0}) ?????", CasterAuraSpell);
             }
 
             if (TargetAuraSpell != 0)
             {
-                if (DBC.DBC.SpellInfoStore.ContainsKey(TargetAuraSpell))
-                    rtb.AppendFormatLine("  Target Aura Spell ({0}) {1}", TargetAuraSpell, DBC.DBC.SpellInfoStore[TargetAuraSpell].Name);
+                if (WowData.SpellInfoStore.ContainsKey(TargetAuraSpell))
+                    rtb.AppendFormatLine("  Target Aura Spell ({0}) {1}", TargetAuraSpell, WowData.SpellInfoStore[TargetAuraSpell].Name);
                 else
                     rtb.AppendFormatLine("  Target Aura Spell ({0}) ?????", TargetAuraSpell);
             }
 
             if (ExcludeCasterAuraSpell != 0)
             {
-                if (DBC.DBC.SpellInfoStore.ContainsKey(ExcludeCasterAuraSpell))
-                    rtb.AppendFormatLine("  Ex Caster Aura Spell ({0}) {1}", ExcludeCasterAuraSpell, DBC.DBC.SpellInfoStore[ExcludeCasterAuraSpell].Name);
+                if (WowData.SpellInfoStore.ContainsKey(ExcludeCasterAuraSpell))
+                    rtb.AppendFormatLine("  Ex Caster Aura Spell ({0}) {1}", ExcludeCasterAuraSpell, WowData.SpellInfoStore[ExcludeCasterAuraSpell].Name);
                 else
                     rtb.AppendFormatLine("  Ex Caster Aura Spell ({0}) ?????", ExcludeCasterAuraSpell);
             }
 
             if (ExcludeTargetAuraSpell != 0)
             {
-                if (DBC.DBC.SpellInfoStore.ContainsKey(ExcludeTargetAuraSpell))
-                    rtb.AppendFormatLine("  Ex Target Aura Spell ({0}) {1}", ExcludeTargetAuraSpell, DBC.DBC.SpellInfoStore[ExcludeTargetAuraSpell].Name);
+                if (WowData.SpellInfoStore.ContainsKey(ExcludeTargetAuraSpell))
+                    rtb.AppendFormatLine("  Ex Target Aura Spell ({0}) {1}", ExcludeTargetAuraSpell, WowData.SpellInfoStore[ExcludeTargetAuraSpell].Name);
                 else
                     rtb.AppendFormatLine("  Ex Target Aura Spell ({0}) ?????", ExcludeTargetAuraSpell);
             }
@@ -593,8 +594,8 @@ namespace SpellWork.Spell
 
             if (RequiredAreasId > 0)
             {
-                var areas = (from ag in DBC.DBC.AreaGroupMember.Values where ag.AreaGroupID == RequiredAreasId
-                             join a in DBC.DBC.AreaTable.Values on ag.AreaID equals a.ID
+                var areas = (from ag in WowData.AreaGroupMember.Values where ag.AreaGroupID == RequiredAreasId
+                             join a in WowData.AreaTable.Values on ag.AreaID equals a.ID
                              select a)
                              .ToList();
                 if (areas.Count == 0)
@@ -638,7 +639,7 @@ namespace SpellWork.Spell
 
             AppendItemInfo(rtb);
 
-            AppendSpellVisualInfo();
+            AppendSpellVisualInfo(rtb);
         }
 
         private float CalculateBaseEffectValue(SpellEffectEntry effect)
@@ -648,7 +649,7 @@ namespace SpellWork.Spell
                 if (Scaling == null)
                     return 0.0f;
 
-                var level = DBC.DBC.SelectedLevel - 1;
+                var level = WowData.SelectedLevel - 1;
 
                 if (BaseLevel != 0
                     && (AttributesEx11 & (uint)SpellAtributeEx11.SPELL_ATTR11_SCALES_WITH_ITEM_LEVEL) == 0
@@ -669,13 +670,13 @@ namespace SpellWork.Spell
 
                     if (Scaling.ScalesFromItemLevel != 0 || (AttributesEx11 & (uint)SpellAtributeEx11.SPELL_ATTR11_SCALES_WITH_ITEM_LEVEL) != 0)
                     {
-                        var effectiveItemLevel = (int)DBC.DBC.SelectedItemLevel;
+                        var effectiveItemLevel = (int)WowData.SelectedItemLevel;
                         if (Scaling.ScalesFromItemLevel != 0)
                             effectiveItemLevel = (ushort)Scaling.ScalesFromItemLevel;
 
                         RandPropPointsEntry randPropPoints;
-                        if (!DBC.DBC.RandPropPoints.TryGetValue(effectiveItemLevel, out randPropPoints))
-                            randPropPoints = DBC.DBC.RandPropPoints.Last().Value;
+                        if (!WowData.RandPropPoints.TryGetValue(effectiveItemLevel, out randPropPoints))
+                            randPropPoints = WowData.RandPropPoints.Last().Value;
                     }
                     else
                     {
@@ -701,12 +702,12 @@ namespace SpellWork.Spell
                         stat = ExpectedStatType.CreatureAutoAttackDps;
 
                     var contentTuningId = ContentTuningID;
-                    if (DBC.DBC.SelectedMapDifficulty != null)
-                        contentTuningId = DBC.DBC.SelectedMapDifficulty.ContentTuningID;
+                    if (WowData.SelectedMapDifficulty != null)
+                        contentTuningId = WowData.SelectedMapDifficulty.ContentTuningID;
 
                     var expansion = -2;
 
-                    value = ExpectedStat.Evaluate(stat, DBC.DBC.SelectedLevel, expansion, contentTuningId, 0, Classes.CLASS_NONE) * value / 100.0f;
+                    value = ExpectedStat.Evaluate(stat, WowData.SelectedLevel, expansion, contentTuningId, 0, Classes.CLASS_NONE) * value / 100.0f;
                 }
 
                 return (float)Math.Round(value);
@@ -760,12 +761,12 @@ namespace SpellWork.Spell
 
             // rtb.AppendFormatIfNotNull("  Multiple = {0:F}", effect.ValueMultiplier);
 
-            if (usesExpectedStat && DBC.DBC.SelectedMapDifficulty != null)
+            if (usesExpectedStat && WowData.SelectedMapDifficulty != null)
             {
                 rtb.SelectionColor = Color.MediumPurple;
-                rtb.AppendFormat(" ({2} - {0}: {1})", DBC.DBC.Map[(int)DBC.DBC.SelectedMapDifficulty.MapID].MapName,
-                    DBC.DBC.Difficulty[DBC.DBC.SelectedMapDifficulty.DifficultyID].Name,
-                    DBC.DBC.SelectedMapDifficulty.MapID);
+                rtb.AppendFormat(" ({2} - {0}: {1})", WowData.Map[(int)WowData.SelectedMapDifficulty.MapID].MapName,
+                    WowData.Difficulty[WowData.SelectedMapDifficulty.DifficultyID].Name,
+                    WowData.SelectedMapDifficulty.MapID);
             }
 
             rtb.AppendLine();
@@ -787,10 +788,10 @@ namespace SpellWork.Spell
                 if (label != null)
                     rtb.AppendFormatLine("SpellLabel = {0}", label.Value);
 
-                var query = from spell in DBC.DBC.SpellInfoStore.Values
+                var query = from spell in WowData.SpellInfoStore.Values
                             where (spell.SpellFamilyName == SpellFamilyName && spell.SpellClassMask.ContainsElement(classMask))
                                 || (label != null && spell.Labels.Contains(label.Value))
-                            join sk in DBC.DBC.SkillLineAbility.Values on spell.ID equals sk.Spell into temp
+                            join sk in WowData.SkillLineAbility.Values on spell.ID equals sk.Spell into temp
                             from skill in temp.DefaultIfEmpty(new SkillLineAbilityEntry())
                             select new
                             {
@@ -822,9 +823,9 @@ namespace SpellWork.Spell
             var trigger = effect.EffectTriggerSpell;
             if (trigger != 0)
             {
-                if (DBC.DBC.SpellInfoStore.ContainsKey((int)trigger))
+                if (WowData.SpellInfoStore.ContainsKey((int)trigger))
                 {
-                    var triggerSpell = DBC.DBC.SpellInfoStore[(int)trigger];
+                    var triggerSpell = WowData.SpellInfoStore[(int)trigger];
                     rtb.SetStyle(Color.Blue, FontStyle.Bold);
                     rtb.AppendFormatLine("   Trigger spell ({0}) {1}. Chance = {2}", trigger, triggerSpell.Name, ProcChance);
                     rtb.AppendFormatLineIfNotNull("   Description: {0}", triggerSpell.Description);
@@ -855,11 +856,11 @@ namespace SpellWork.Spell
 
         private static void AppendRadius(RichTextBox rtb, string name, uint radiusIndex)
         {
-            if (!DBC.DBC.SpellRadius.ContainsKey((int)radiusIndex))
+            if (!WowData.SpellRadius.ContainsKey((int)radiusIndex))
                 return;
 
-            rtb.AppendLine($"{name}Radius (Id {radiusIndex}) {DBC.DBC.SpellRadius[(int)radiusIndex].Radius:F}" +
-                $" (Min: {DBC.DBC.SpellRadius[(int)radiusIndex].RadiusMin:F} Max: {DBC.DBC.SpellRadius[(int)radiusIndex].MaxRadius:F})");
+            rtb.AppendLine($"{name}Radius (Id {radiusIndex}) {WowData.SpellRadius[(int)radiusIndex].Radius:F}" +
+                $" (Min: {WowData.SpellRadius[(int)radiusIndex].RadiusMin:F} Max: {WowData.SpellRadius[(int)radiusIndex].MaxRadius:F})");
         }
 
         private static void AuraModTypeName(RichTextBox rtb, SpellEffectEntry effect)
@@ -973,7 +974,7 @@ namespace SpellWork.Spell
             switch (aura)
             {
                 case AuraType.SPELL_AURA_OVERRIDE_SPELLS:
-                    if (!DBC.DBC.OverrideSpellData.ContainsKey(misc))
+                    if (!WowData.OverrideSpellData.ContainsKey(misc))
                     {
                         rtb.SetStyle(Color.Red, FontStyle.Bold);
                         rtb.AppendFormatLine("Cannot find key {0} in OverrideSpellData.dbc", (uint)misc);
@@ -982,7 +983,7 @@ namespace SpellWork.Spell
                     {
                         rtb.AppendLine();
                         rtb.SetStyle(Color.DarkRed, FontStyle.Bold);
-                        var @override = DBC.DBC.OverrideSpellData[misc];
+                        var @override = WowData.OverrideSpellData[misc];
                         for (var i = 0; i < 10; ++i)
                         {
                             if (@override.Spells[i] == 0)
@@ -990,7 +991,7 @@ namespace SpellWork.Spell
 
                             rtb.SetStyle(Color.DarkBlue, FontStyle.Regular);
                             rtb.AppendFormatLine("\t - #{0} ({1}) {2}", i + 1, @override.Spells[i],
-                                DBC.DBC.SpellInfoStore.ContainsKey(@override.Spells[i]) ? DBC.DBC.SpellInfoStore[@override.Spells[i]].Name : "?????");
+                                WowData.SpellInfoStore.ContainsKey(@override.Spells[i]) ? WowData.SpellInfoStore[@override.Spells[i]].Name : "?????");
                         }
                         rtb.AppendLine();
                     }
@@ -998,7 +999,7 @@ namespace SpellWork.Spell
                 case AuraType.SPELL_AURA_SCREEN_EFFECT:
                     rtb.SetStyle(Color.DarkBlue, FontStyle.Bold);
                     rtb.AppendFormatLine("ScreenEffect: {0}",
-                        DBC.DBC.ScreenEffect.ContainsKey(misc) ? DBC.DBC.ScreenEffect[misc].Name : "?????");
+                        WowData.ScreenEffect.ContainsKey(misc) ? WowData.ScreenEffect[misc].Name : "?????");
                     break;
             }
         }
@@ -1032,16 +1033,10 @@ namespace SpellWork.Spell
 
         private void AppendSpellVisualInfo(RichTextBox rtb)
         {
-            SpellVisualEntry visualData;
-            if (!DBC.DBC.SpellVisual.TryGetValue(_spell.SpellVisual[0], out visualData))
+            if (!WowData.SpellVisual.TryGetValue(SpellVisualID, out SpellVisualEntry visualData))
                 return;
 
-            SpellMissileEntry missileEntry;
-            SpellMissileMotionEntry missileMotionEntry;
-            var hasMissileEntry = DBC.DBC.SpellMissile.TryGetValue(visualData.Id, out missileEntry);
-            var hasMissileMotion = DBC.DBC.SpellMissileMotion.TryGetValue(visualData.Id, out missileMotionEntry);
-
-            if (!hasMissileEntry && !hasMissileMotion)
+            if (!WowData.SpellVisualMissile.TryGetValue(visualData.SpellVisualMissileSetID, out SpellVisualMissileEntry missileVisualEntry))
                 return;
 
             rtb.AppendLine(Separator);
@@ -1050,12 +1045,12 @@ namespace SpellWork.Spell
             rtb.SetDefaultStyle();
 
             // Missile Model Data.
-            if (hasMissileEntry)
+            if (WowData.SpellMissile.TryGetValue(missileVisualEntry.SpellVisualMissileSetID, out SpellMissileEntry missileEntry))
             {
                 rtb.AppendFormatLine("Missile Model ID: {0}", visualData.SpellVisualMissileSetID);
                 rtb.AppendFormatLine("Missile attachment: {0}", visualData.MissileAttachment);
-                rtb.AppendFormatLine("Missile cast offset: X:{0} Y:{1} Z:{2}", visualData.MissileCastOffsetX, visualData.MissileCastOffsetY, visualData.MissileCastOffsetZ);
-                rtb.AppendFormatLine("Missile impact offset: X:{0} Y:{1} Z:{2}", visualData.MissileImpactOffsetX, visualData.MissileImpactOffsetY, visualData.MissileImpactOffsetZ);
+                rtb.AppendFormatLine("Missile cast offset: X:{0} Y:{1} Z:{2}", visualData.MissileCastOffset[0], visualData.MissileCastOffset[1], visualData.MissileCastOffset[2]);
+                rtb.AppendFormatLine("Missile impact offset: X:{0} Y:{1} Z:{2}", visualData.MissileImpactOffset[0], visualData.MissileImpactOffset[1], visualData.MissileImpactOffset[2]);
                 rtb.AppendFormatLine("MissileEntry ID: {0}", missileEntry.ID);
                 rtb.AppendFormatLine("Collision Radius: {0}", missileEntry.CollisionRadius);
                 rtb.AppendFormatLine("Default Pitch: {0} - {1}", missileEntry.DefaultPitchMin, missileEntry.DefaultPitchMax);
@@ -1068,60 +1063,13 @@ namespace SpellWork.Spell
             }
 
             // Missile Motion Data.
-            if (hasMissileMotion)
+            if (WowData.SpellMissileMotion.TryGetValue(missileVisualEntry.SpellMissileMotionID, out SpellMissileMotionEntry missileMotionEntry))
             {
                 rtb.AppendFormatLine("Missile motion: {0}", missileMotionEntry.Name);
                 rtb.AppendFormatLine("Missile count: {0}", missileMotionEntry.MissileCount);
                 rtb.AppendLine("Missile Script body:");
                 rtb.AppendText(missileMotionEntry.Script);
             }
-        }
-
-        private void AppendSpellVisualInfo()
-        {
-            /*SpellVisualEntry visualData;
-            if (!DBC.DBC.SpellVisual.TryGetValue(_spell.SpellVisual[0], out visualData))
-                return;
-
-            SpellMissileEntry missileEntry;
-            SpellMissileMotionEntry missileMotionEntry;
-            var hasMissileEntry = DBC.DBC.SpellMissile.TryGetValue(visualData.MissileModel, out missileEntry);
-            var hasMissileMotion = DBC.DBC.SpellMissileMotion.TryGetValue(visualData.MissileMotionId, out missileMotionEntry);
-
-            if (!hasMissileEntry && !hasMissileMotion)
-                return;
-
-            _rtb.AppendLine(_line);
-            _rtb.SetBold();
-            _rtb.AppendLine("Missile data");
-            _rtb.SetDefaultStyle();
-
-            // Missile Model Data.
-            if (hasMissileEntry)
-            {
-                _rtb.AppendFormatLine("Missile Model ID: {0}", visualData.MissileModel);
-                _rtb.AppendFormatLine("Missile attachment: {0}", visualData.MissileAttachment);
-                _rtb.AppendFormatLine("Missile cast offset: X:{0} Y:{1} Z:{2}", visualData.MissileCastOffsetX, visualData.MissileCastOffsetY, visualData.MissileCastOffsetZ);
-                _rtb.AppendFormatLine("Missile impact offset: X:{0} Y:{1} Z:{2}", visualData.MissileImpactOffsetX, visualData.MissileImpactOffsetY, visualData.MissileImpactOffsetZ);
-                _rtb.AppendFormatLine("MissileEntry ID: {0}", missileEntry.ID);
-                _rtb.AppendFormatLine("Collision Radius: {0}", missileEntry.CollisionRadius);
-                _rtb.AppendFormatLine("Default Pitch: {0} - {1}", missileEntry.DefaultPitchMin, missileEntry.DefaultPitchMax);
-                _rtb.AppendFormatLine("Random Pitch: {0} - {1}", missileEntry.RandomizePitchMax, missileEntry.RandomizePitchMax);
-                _rtb.AppendFormatLine("Default Speed: {0} - {1}", missileEntry.DefaultSpeedMin, missileEntry.DefaultSpeedMax);
-                _rtb.AppendFormatLine("Randomize Speed: {0} - {1}", missileEntry.RandomizeSpeedMin, missileEntry.RandomizeSpeedMax);
-                _rtb.AppendFormatLine("Gravity: {0}", missileEntry.Gravity);
-                _rtb.AppendFormatLine("Maximum duration:", missileEntry.MaxDuration);
-                _rtb.AppendLine("");
-            }
-
-            // Missile Motion Data.
-            if (hasMissileMotion)
-            {
-                _rtb.AppendFormatLine("Missile motion: {0}", missileMotionEntry.Name);
-                _rtb.AppendFormatLine("Missile count: {0}", missileMotionEntry.MissileCount);
-                _rtb.AppendLine("Missile Script body:");
-                _rtb.AppendText(missileMotionEntry.Script);
-            }*/
         }
 
         public bool HasEffect(SpellEffects effect)

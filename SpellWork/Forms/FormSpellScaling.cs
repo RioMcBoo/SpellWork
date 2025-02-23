@@ -1,4 +1,4 @@
-﻿using SpellWork.DBC.Structures;
+﻿using WOWClient.DB2.Structures;
 using System;
 using System.Data;
 using System.Windows.Forms;
@@ -17,10 +17,10 @@ namespace SpellWork.Forms
             InitializeMapComboBox();
             InitializeDifficultyComboBox();
 
-            if (DBC.DBC.SelectedMapDifficulty != null)
+            if (WowData.SelectedMapDifficulty != null)
             {
-                _cbMap.SelectedValue = DBC.DBC.Map[(int)DBC.DBC.SelectedMapDifficulty.MapID];
-                _cbDifficulty.SelectedValue = DBC.DBC.SelectedMapDifficulty;
+                _cbMap.SelectedValue = WowData.Map[(int)WowData.SelectedMapDifficulty.MapID];
+                _cbDifficulty.SelectedValue = WowData.SelectedMapDifficulty;
             }
         }
 
@@ -34,7 +34,7 @@ namespace SpellWork.Forms
 
             dt.Rows.Add();
 
-            foreach (var map in DBC.DBC.Map.Values)
+            foreach (var map in WowData.Map.Values)
             {
                 var row = dt.NewRow();
                 row["Value"] = map;
@@ -59,16 +59,16 @@ namespace SpellWork.Forms
 
             dt.Rows.Add();
 
-            foreach (var difficulty in DBC.DBC.MapDifficulty.Values)
+            foreach (var difficulty in WowData.MapDifficulty.Values)
             {
-                if (!DBC.DBC.Difficulty.ContainsKey(difficulty.DifficultyID))
+                if (!WowData.Difficulty.ContainsKey(difficulty.DifficultyID))
                     continue;
 
                 var row = dt.NewRow();
                 row["Value"] = difficulty;
                 row["MapID"] = difficulty.MapID;
                 row["DifficultyID"] = difficulty.DifficultyID;
-                row["Name"] = DBC.DBC.Difficulty[difficulty.DifficultyID].Name;
+                row["Name"] = WowData.Difficulty[difficulty.DifficultyID].Name;
                 dt.Rows.Add(row);
             }
 
@@ -104,8 +104,8 @@ namespace SpellWork.Forms
             }
 
             var val = uint.Parse(tb.Text);
-            if (val > DBC.DBC.MaxLevel)
-                tb.Text = DBC.DBC.MaxLevel.ToString();
+            if (val > WowData.MaxLevel)
+                tb.Text = WowData.MaxLevel.ToString();
             else if (val <= 0)
                 tb.Text = "1";
 
@@ -123,8 +123,8 @@ namespace SpellWork.Forms
             }
 
             var val = uint.Parse(tb.Text);
-            if (val > DBC.DBC.MaxItemLevel)
-                tb.Text = DBC.DBC.MaxItemLevel.ToString();
+            if (val > WowData.MaxItemLevel)
+                tb.Text = WowData.MaxItemLevel.ToString();
             else if (val <= 0)
                 tb.Text = "1";
 

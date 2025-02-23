@@ -39,7 +39,7 @@ namespace SpellWork
                 {
                     try
                     {
-                        await DBC.DBC.Load(progress =>
+                        await WowData.Load(progress =>
                         {
                             if (mainForm.InvokeRequired)
                                 mainForm.Invoke(new Action(() => mainForm.SetLoadingProgress(progress)));

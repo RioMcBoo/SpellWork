@@ -1,0 +1,16 @@
+﻿using FileDataReader;
+
+namespace WOWClient.DB2.Structures
+{
+    public class SpellLevelsEntry
+    {
+        [Index(true)]
+        public int ID;
+        public byte DifficultyID;
+        public short BaseLevel;
+        public short MaxLevel;
+        public short SpellLevel;
+        public byte MaxPassiveAuraLevel;
+        public int SpellID;
+    }
+}
