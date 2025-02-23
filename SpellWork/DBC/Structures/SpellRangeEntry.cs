@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public sealed class SpellRangeEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public string DisplayName;
         public string DisplayNameShort;
         public byte Flags;

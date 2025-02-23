@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class SpellCastingRequirementsEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public int SpellID;
         public byte FacingCasterFlags;
         public ushort MinFactionID;

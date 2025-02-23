@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public sealed class SpellShapeshiftEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public int SpellID;
         public sbyte StanceBarOrder;
         [Cardinality(2)]

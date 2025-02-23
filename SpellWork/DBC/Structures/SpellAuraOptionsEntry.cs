@@ -5,9 +5,9 @@ namespace SpellWork.DBC.Structures
     public class SpellAuraOptionsEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public byte DifficultyID;
-        public ushort CumulativeAura;
+        public int CumulativeAura;
         public int ProcCategoryRecovery;
         public byte ProcChance;
         public int ProcCharges;

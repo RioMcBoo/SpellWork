@@ -40,6 +40,9 @@ namespace SpellWork.GameTables
                         // ReSharper disable once SwitchStatementMissingSomeCases
                         switch (Type.GetTypeCode(field.FieldType))
                         {
+                            case TypeCode.Int32:
+                                field.SetValue(record, int.Parse(lineTokens[fieldIndex], CultureInfo.InvariantCulture));
+                                break;
                             case TypeCode.UInt32:
                                 field.SetValue(record, uint.Parse(lineTokens[fieldIndex], CultureInfo.InvariantCulture));
                                 break;

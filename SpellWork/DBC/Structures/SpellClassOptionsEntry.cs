@@ -5,9 +5,9 @@ namespace SpellWork.DBC.Structures
     public class SpellClassOptionsEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public int SpellID;
-        public uint ModalNextSpell;
+        public int ModalNextSpell;
         public byte SpellClassSet;
         [Cardinality(4)]
         public int[] SpellClassMask = new int[4];

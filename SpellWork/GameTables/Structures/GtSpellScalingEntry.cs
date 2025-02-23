@@ -4,7 +4,7 @@
     internal class GtSpellScalingEntry : GameTableRecord
     {
         // ReSharper disable MemberCanBePrivate.Global
-        public uint ID;
+        public int ID;
         public float Rogue;
         public float Druid;
         public float Hunter;
@@ -17,15 +17,12 @@
         public float DeathKnight;
         public float Monk;
         public float DemonHunter;
-        public float Evoker;
         public float Item;
         public float Consumable;
         public float Gem1;
         public float Gem2;
         public float Gem3;
         public float Health;
-        public float DamageReplaceStat;
-        public float DamageSecondary;
         // ReSharper restore MemberCanBePrivate.Global
 
         public float GetColumnForClass(int scalingClass)
@@ -45,7 +42,6 @@
                 case 10: return Monk;
                 case 11: return Druid;
                 case 12: return DemonHunter;
-                case 13: return Evoker;
                 case -1: return Item;
                 case -2: return Consumable;
                 case -3: return Gem1;
@@ -53,8 +49,6 @@
                 case -5: return Gem3;
                 case -6: return Health;
                 case -7: return Item;
-                case -8: return DamageReplaceStat;
-                case -9: return DamageSecondary;
                 default:
                     break;
             }

@@ -38,8 +38,8 @@ namespace SpellWork.Spell
             //MythicPlusSeasonEntry currentSeason = null;
             //DBC.DBC.MythicPlusSeason.TryGetValue(mythicPlusSeasonId, out currentSeason);
 
-            var contentTuningMods = DBC.DBC.ContentTuningXExpected.Values
-                .Where(ctxe => ctxe.ContentTuningID == contentTuningId)
+            var contentTuningMods = DBC.DBC.ContentTuning.Values
+                .Where(ctxe => ctxe.Id == contentTuningId)
                 //.Where(ctxe =>
                 //{
                 //    if (currentSeason != null && DBC.DBC.MythicPlusSeason.TryGetValue(ctxe.MinMythicPlusSeasonID, out var minSeason))
@@ -52,8 +52,7 @@ namespace SpellWork.Spell
 
                 //    return true;
                 //})
-                .Where(ctxe => DBC.DBC.ExpectedStatMod.ContainsKey(ctxe.ExpectedStatModID))
-                .Select(ctxe => DBC.DBC.ExpectedStatMod[ctxe.ExpectedStatModID]);
+                .Select(ctxe => DBC.DBC.ExpectedStatMod[ctxe.Id]);
 
             Func<ExpectedStatModEntry, float> modValueExtractor = null;
             float value = 0.0f;
@@ -155,7 +154,7 @@ namespace SpellWork.Spell
                         case AuraType.SPELL_AURA_MOD_DAMAGE_TAKEN:
                         case AuraType.SPELL_AURA_MOD_INCREASE_HEALTH:
                         case AuraType.SPELL_AURA_SCHOOL_ABSORB:
-                        case AuraType.SPELL_AURA_MOD_REGEN:
+                        case AuraType.SPELL_AURA_MOD_HEALTH_REGEN:
                         case AuraType.SPELL_AURA_MANA_SHIELD:
                         case AuraType.SPELL_AURA_MOD_HEALING:
                         case AuraType.SPELL_AURA_MOD_HEALING_DONE:

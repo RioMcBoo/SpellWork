@@ -5,8 +5,8 @@ namespace SpellWork.DBC.Structures
     public sealed class SpellLabelEntry
     {
         [Index(true)]
-        public uint ID;
-        public uint LabelID;
+        public int ID;
+        public int LabelID;
         public int SpellID;
     }
 }

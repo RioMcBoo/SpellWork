@@ -5,12 +5,12 @@ namespace SpellWork.DBC.Structures
     public class SpellLevelsEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public byte DifficultyID;
+        public short BaseLevel;
         public short MaxLevel;
+        public short SpellLevel;
         public byte MaxPassiveAuraLevel;
-        public int BaseLevel;
-        public int SpellLevel;
         public int SpellID;
     }
 }

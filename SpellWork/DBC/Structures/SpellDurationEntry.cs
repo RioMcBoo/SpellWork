@@ -5,8 +5,9 @@ namespace SpellWork.DBC.Structures
     public sealed class SpellDurationEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public int Duration;
+        public int DurationPerLevel;
         public int MaxDuration;
     }
 }

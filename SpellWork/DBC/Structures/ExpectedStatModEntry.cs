@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class ExpectedStatModEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public float CreatureHealthMod;
         public float PlayerHealthMod;
         public float CreatureAutoAttackDPSMod;

@@ -19,14 +19,13 @@ namespace SpellWork.DBC
 {
     public static class DBC
     {
-        public const string Version = "SpellWork 10.2.5 (52902)";
-        public const uint MaxLevel = 70;
-        public const uint MaxItemLevel = 1300;
+        public const string Version = "SpellWork 3.4.3 (54261)";
+        public const uint MaxLevel = 80;
+        public const uint MaxItemLevel = 284;
 
         public static Storage<AreaGroupMemberEntry>             AreaGroupMember { get; set; }
         public static Storage<AreaTableEntry>                   AreaTable { get; set; }
         public static Storage<ContentTuningEntry>               ContentTuning { get; set; }
-        public static Storage<ContentTuningXExpectedEntry>      ContentTuningXExpected { get; set; }
         public static Storage<DifficultyEntry>                  Difficulty { get; set; }
         public static Storage<ExpectedStatEntry>                ExpectedStat { get; set; }
         public static Storage<ExpectedStatModEntry>             ExpectedStatMod { get; set; }
@@ -107,7 +106,7 @@ namespace SpellWork.DBC
                 var spells = CreateInstance<Storage<SpellEntry>>("Spell", hotfixReader);
                 var spellNames = CreateInstance<Storage<SpellNameEntry>>("SpellName", hotfixReader);
                 foreach (var spell in spellNames)
-                    SpellInfoStore[(int) spell.Value.ID] = new SpellInfo(spell.Value.Name, spells.GetValue((int) spell.Value.ID));
+                    SpellInfoStore[spell.Value.ID] = new SpellInfo(spell.Value.Name, spells.GetValue(spell.Value.ID));
             }
 
             List<Action> storeProcessingActions = new List<Action>
@@ -485,28 +484,6 @@ namespace SpellWork.DBC
                     }
                     progressHandler.IncrementStepsProgress();
                 },
-                () =>
-                {
-                    var itemEffects = CreateInstance<Storage<ItemEffectEntry>>("ItemEffect", hotfixReader);
-                    var itemSparses = CreateInstance<Storage<ItemSparseEntry>>("ItemSparse", hotfixReader);
-                    var itemXItemEffects = CreateInstance<Storage<ItemXItemEffectEntry>>("ItemXItemEffect", hotfixReader);
-
-                    foreach (var itemXItemEffect in itemXItemEffects.Values)
-                    {
-                        if (!itemEffects.TryGetValue(itemXItemEffect.ItemEffectID, out var itemEffect))
-                            continue;
-
-                        if (!SpellInfoStore.ContainsKey(itemEffect.SpellID))
-                            continue;
-
-                        itemEffect.ItemID = itemXItemEffect.ItemID;
-                        if (itemSparses.TryGetValue(itemXItemEffect.ItemID, out var item))
-                            itemEffect.Item = item;
-
-                        SpellInfoStore[itemEffect.SpellID].ItemEffects.Add(itemEffect);
-                    }
-                    progressHandler.IncrementStepsProgress();
-                }
             };
 
             progressHandler.StartStepsProgress(storeProcessingActions.Count, (int)Progress.MySQLSpells);

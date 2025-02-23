@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class SpellCategoriesEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public byte DifficultyID;
         public short Category;
         public sbyte DefenseType;

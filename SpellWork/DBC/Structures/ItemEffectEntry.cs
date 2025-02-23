@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public sealed class ItemEffectEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public byte LegacySlotIndex;
         public sbyte TriggerType;
         public short Charges;
@@ -14,6 +14,7 @@ namespace SpellWork.DBC.Structures
         public ushort SpellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
+        public int ParentItemID;
 
         // Helper
         public ItemSparseEntry Item { get; set; }

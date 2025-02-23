@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class ExpectedStatEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public int ExpansionID;
         public float CreatureHealth;
         public float PlayerHealth;
@@ -16,6 +16,6 @@ namespace SpellWork.DBC.Structures
         public float PlayerSecondaryStat;
         public float ArmorConstant;
         public float CreatureSpellDamage;
-        public uint Lvl;
+        public int Lvl;
     }
 }

@@ -5,8 +5,8 @@ namespace SpellWork.DBC.Structures
     public sealed class AreaGroupMemberEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public ushort AreaID;
-        public ushort AreaGroupID;
+        public int AreaGroupID;
     }
 }

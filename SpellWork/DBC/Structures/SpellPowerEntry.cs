@@ -10,11 +10,10 @@ namespace SpellWork.DBC.Structures
         public int ManaCost;
         public int ManaCostPerLevel;
         public int ManaPerSecond;
-        public uint PowerDisplayID;
+        public int PowerDisplayID;
         public int AltPowerBarID;
         public float PowerCostPct;
         public float PowerCostMaxPct;
-        public float OptionalCostPct;
         public float PowerPctPerSecond;
         public sbyte PowerType;
         public int RequiredAuraSpellID;

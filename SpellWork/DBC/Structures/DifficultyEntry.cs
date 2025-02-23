@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class DifficultyEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public string Name;
         public byte InstanceType;
         public byte OrderIndex;
@@ -13,7 +13,7 @@ namespace SpellWork.DBC.Structures
         public byte FallbackDifficultyID;
         public byte MinPlayers;
         public byte MaxPlayers;
-        public ushort Flags;
+        public byte Flags;
         public byte ItemContext;
         public byte ToggleDifficultyID;
         public ushort GroupSizeHealthCurveID;

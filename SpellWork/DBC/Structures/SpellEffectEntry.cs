@@ -5,17 +5,19 @@ namespace SpellWork.DBC.Structures
     public sealed class SpellEffectEntry
     {
         [Index(true)]
-        public uint ID;
-        public short EffectAura;
+        public int ID;
         public int DifficultyID;
         public int EffectIndex;
         public int Effect;
         public float EffectAmplitude;
         public int EffectAttributes;
+        public short EffectAura;
         public int EffectAuraPeriod;
+        public int EffectBasePoints;
         public float EffectBonusCoefficient;
         public float EffectChainAmplitude;
         public int EffectChainTargets;
+        public int EffectDieSides;
         public int EffectItemType;
         public int EffectMechanic;
         public float EffectPointsPerResource;
@@ -28,8 +30,6 @@ namespace SpellWork.DBC.Structures
         public float Variance;
         public float ResourceCoefficient;
         public float GroupSizeBasePointsCoefficient;
-        public float EffectBasePoints;
-        public int ScalingClass;
         [Cardinality(2)]
         public int[] EffectMiscValue = new int[2];
         [Cardinality(2)]

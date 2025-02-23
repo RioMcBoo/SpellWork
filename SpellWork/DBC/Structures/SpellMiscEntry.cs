@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class SpellMiscEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         [Cardinality(15)]
         public int[] Attributes = new int[15];
         public byte DifficultyID;
@@ -20,8 +20,6 @@ namespace SpellWork.DBC.Structures
         public int ActiveIconFileDataID;
         public int ContentTuningID;
         public int ShowFutureSpellPlayerConditionID;
-        public int SpellVisualScript;
-        public int ActiveSpellVisualScript;
         public int SpellID;
     }
 }

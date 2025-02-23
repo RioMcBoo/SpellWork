@@ -5,7 +5,7 @@ namespace SpellWork.DBC.Structures
     public class SpellInterruptsEntry
     {
         [Index(true)]
-        public uint ID;
+        public int ID;
         public byte DifficultyID;
         public short InterruptFlags;
         [Cardinality(2)]

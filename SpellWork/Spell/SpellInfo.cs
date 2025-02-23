@@ -33,7 +33,7 @@ namespace SpellWork.Spell
         [IgnoreAutopopulatedFilterValue]
         public List<ItemEffectEntry> ItemEffects { get; } = new List<ItemEffectEntry>();
         [IgnoreAutopopulatedFilterValue]
-        public ISet<uint> Labels { get; } = new HashSet<uint>();
+        public ISet<int> Labels { get; } = new HashSet<int>();
         [IgnoreAutopopulatedFilterValue]
         public SpellLevelsEntry Levels { get; set; }
         [IgnoreAutopopulatedFilterValue]
@@ -105,8 +105,8 @@ namespace SpellWork.Spell
 
         #region SpellClassOptions
         // SpellClassOptions
-        public uint ModalNextSpell => ClassOptions?.ModalNextSpell ?? 0;
-        public uint SpellFamilyName => ClassOptions?.SpellClassSet ?? 0;
+        public int ModalNextSpell => ClassOptions?.ModalNextSpell ?? 0;
+        public int SpellFamilyName => ClassOptions?.SpellClassSet ?? 0;
         public uint[] SpellClassMask => Array.ConvertAll(ClassOptions?.SpellClassMask ?? new int[4], i => (uint)i);
         #endregion
 
@@ -151,8 +151,6 @@ namespace SpellWork.Spell
         public int ExcludeTargetAuraSpell => AuraRestrictions?.ExcludeTargetAuraSpell ?? 0;
         public int CasterAuraType => AuraRestrictions?.CasterAuraType ?? 0;
         public int TargetAuraType => AuraRestrictions?.TargetAuraType ?? 0;
-        public int ExcludeCasterAuraType => AuraRestrictions?.ExcludeCasterAuraType ?? 0;
-        public int ExcludeTargetAuraType => AuraRestrictions?.ExcludeTargetAuraType ?? 0;
         #endregion
 
         #region SpellAuraOptions
@@ -160,7 +158,7 @@ namespace SpellWork.Spell
         public uint ProcChance => AuraOptions?.ProcChance ?? 0;
         public uint ProcFlags => (uint)(AuraOptions?.ProcTypeMask[0] ?? 0);
         public uint ProcFlagsEx => (uint)(AuraOptions?.ProcTypeMask[1] ?? 0);
-        public uint CumulativeAura => AuraOptions?.CumulativeAura ?? 0;
+        public int CumulativeAura => AuraOptions?.CumulativeAura ?? 0;
         public int ProcCooldown => AuraOptions?.ProcCategoryRecovery ?? 0;
         #endregion
 
@@ -185,7 +183,7 @@ namespace SpellWork.Spell
         #endregion
 
         #region SpellXSpellVisual
-        public uint SpellVisualID => SpellXSpellVisual?.SpellVisualID ?? 0;
+        public int SpellVisualID => SpellXSpellVisual?.SpellVisualID ?? 0;
         #endregion
 
         #region CastingRequirements
@@ -214,7 +212,7 @@ namespace SpellWork.Spell
         #region SpellTargetRestrictions
         public float ConeDegrees => TargetRestrictions?.ConeDegrees ?? 0;
         public byte MaxTargets => TargetRestrictions?.MaxTargets ?? 0;
-        public uint MaxTargetLevel => TargetRestrictions?.MaxTargetLevel ?? 0;
+        public int MaxTargetLevel => TargetRestrictions?.MaxTargetLevel ?? 0;
         public short TargetCreatureType => TargetRestrictions?.TargetCreatureType ?? 0;
         public int Targets => TargetRestrictions?.Targets ?? 0;
         public float ConeWidth => TargetRestrictions?.Width ?? 0;
@@ -252,7 +250,7 @@ namespace SpellWork.Spell
 
         public SpellInfo(string spellName, SpellEntry spellEntry)
         {
-            ID = (int)spellEntry.ID;
+            ID = spellEntry.ID;
             Name = spellName;
             NameSubtext = spellEntry.NameSubtext ?? string.Empty;
             Description = spellEntry.Description ?? string.Empty;
@@ -593,16 +591,10 @@ namespace SpellWork.Spell
             if (TargetAuraType != 0)
                 rtb.AppendFormatLine("TargetAuraType = {0} ({1})", TargetAuraType, (AuraType)TargetAuraType);
 
-            if (ExcludeCasterAuraType != 0)
-                rtb.AppendFormatLine("ExcludeCasterAuraType = {0} ({1})", ExcludeCasterAuraType, (AuraType)ExcludeCasterAuraType);
-
-            if (ExcludeTargetAuraType != 0)
-                rtb.AppendFormatLine("ExcludeTargetAuraType = {0} ({1})", ExcludeTargetAuraType, (AuraType)ExcludeTargetAuraType);
-
             if (RequiredAreasId > 0)
             {
                 var areas = (from ag in DBC.DBC.AreaGroupMember.Values where ag.AreaGroupID == RequiredAreasId
-                             join a in DBC.DBC.AreaTable.Values on (uint)ag.AreaID equals a.ID
+                             join a in DBC.DBC.AreaTable.Values on ag.AreaID equals a.ID
                              select a)
                              .ToList();
                 if (areas.Count == 0)
@@ -672,7 +664,7 @@ namespace SpellWork.Spell
                 float value = 0.0f;
                 if (level > 0)
                 {
-                    if (effect.ScalingClass == 0)
+                    if (Scaling.Class == 0)
                         return 0.0f;
 
                     if (Scaling.ScalesFromItemLevel != 0 || (AttributesEx11 & (uint)SpellAtributeEx11.SPELL_ATTR11_SCALES_WITH_ITEM_LEVEL) != 0)
@@ -684,17 +676,12 @@ namespace SpellWork.Spell
                         RandPropPointsEntry randPropPoints;
                         if (!DBC.DBC.RandPropPoints.TryGetValue(effectiveItemLevel, out randPropPoints))
                             randPropPoints = DBC.DBC.RandPropPoints.Last().Value;
-
-                        if (effect.ScalingClass == -8 || effect.ScalingClass == -9)
-                            value = effect.ScalingClass == -8 ? randPropPoints.DamageReplaceStatF : randPropPoints.DamageSecondaryF;
-                        else
-                            value = randPropPoints.SuperiorF[0];
                     }
                     else
                     {
                         var gtScaling = GameTable<GtSpellScalingEntry>.GetRecord((int)level);
                         Debug.Assert(gtScaling != null);
-                        value = gtScaling.GetColumnForClass(effect.ScalingClass);
+                        value = gtScaling.GetColumnForClass(Scaling.Class);
                     }
                 }
 
@@ -718,8 +705,6 @@ namespace SpellWork.Spell
                         contentTuningId = DBC.DBC.SelectedMapDifficulty.ContentTuningID;
 
                     var expansion = -2;
-                    if (DBC.DBC.ContentTuning.TryGetValue(contentTuningId, out var contentTuning))
-                        expansion = contentTuning.ExpansionID;
 
                     value = ExpectedStat.Evaluate(stat, DBC.DBC.SelectedLevel, expansion, contentTuningId, 0, Classes.CLASS_NONE) * value / 100.0f;
                 }
@@ -880,7 +865,8 @@ namespace SpellWork.Spell
         private static void AuraModTypeName(RichTextBox rtb, SpellEffectEntry effect)
         {
             var aura = (AuraType)effect.EffectAura;
-            var misc = effect.EffectMiscValue[0];
+            var miscA = effect.EffectMiscValue[0];
+            var miscB = effect.EffectMiscValue[1];
 
             if (effect.EffectAura == 0)
             {
@@ -893,45 +879,108 @@ namespace SpellWork.Spell
 
             rtb.AppendFormat("Aura Id {0:D} ({0})", aura);
             rtb.AppendFormat(", value = {0}", effect.EffectBasePoints);
-            rtb.AppendFormat(", misc = {0} (", misc);
+            rtb.AppendFormat(", misc = {0} (", miscA);
 
             switch (aura)
             {
-                case AuraType.SPELL_AURA_MOD_STAT:
-                    rtb.Append((UnitMods)misc);
+                case AuraType.SPELL_AURA_CONVERT_CONSUMED_RUNE:
+                case AuraType.SPELL_AURA_CONVERT_RUNE:
+                    rtb.Append((RuneType)miscA);
                     break;
+                case AuraType.SPELL_AURA_MOD_ADDITIONAL_POWER_COST:
+                case AuraType.SPELL_AURA_MOD_MAX_POWER:
+                case AuraType.SPELL_AURA_MOD_MAX_POWER_PCT:
+                case AuraType.SPELL_AURA_MOD_POWER_DISPLAY:
+                case AuraType.SPELL_AURA_MOD_POWER_GAIN_PCT:
+                case AuraType.SPELL_AURA_MOD_POWER_REGEN:
+                case AuraType.SPELL_AURA_MOD_POWER_REGEN_PERCENT:
+                case AuraType.SPELL_AURA_POWER_BURN:
+                case AuraType.SPELL_AURA_PREVENT_REGENERATE_POWER:
+                case AuraType.SPELL_AURA_TRIGGER_SPELL_ON_POWER_AMOUNT:
+                case AuraType.SPELL_AURA_TRIGGER_SPELL_ON_POWER_PCT:
+                    rtb.Append((Powers)miscA);
+                    break;
+                case AuraType.SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL:
+                case AuraType.SPELL_AURA_MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER:
+                case AuraType.SPELL_AURA_MOD_POWER_COST_SCHOOL:
+                case AuraType.SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
+                case AuraType.SPELL_AURA_MOD_TARGET_ABSORB_SCHOOL:
+                case AuraType.SPELL_AURA_SCHOOL_ABSORB:
+                case AuraType.SPELL_AURA_SCHOOL_ABSORB_OVERKILL:
+                case AuraType.SPELL_AURA_SCHOOL_HEAL_ABSORB:
+                case AuraType.SPELL_AURA_SCHOOL_IMMUNITY:
+                case AuraType.SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+                case AuraType.SPELL_AURA_MOD_HEALING_DONE_PERCENT:
+                case AuraType.SPELL_AURA_MOD_DAMAGE_DONE:
+                case AuraType.SPELL_AURA_MOD_HEALING_DONE:
+                case AuraType.SPELL_AURA_MOD_SPELL_HIT_CHANCE:
+                    rtb.Append((SpellSchoolMask)miscA);
+                    break;
+                case AuraType.SPELL_AURA_MOD_ARMOR_PCT_FROM_STAT:
+                case AuraType.SPELL_AURA_MOD_MANA_REGEN_FROM_STAT:
+                case AuraType.SPELL_AURA_MOD_PERCENT_STAT:
+                case AuraType.SPELL_AURA_MOD_PET_STAT_PCT:
+                case AuraType.SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT:
+                case AuraType.SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT:
+                case AuraType.SPELL_AURA_MOD_SPELL_CRIT_CHANCE_BY_STAT:
+                case AuraType.SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT:
+                case AuraType.SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT:
+                case AuraType.SPELL_AURA_MOD_STAT:
+                case AuraType.SPELL_AURA_MOD_STAT_BONUS_PCT:
+                case AuraType.SPELL_AURA_MOD_SUPPORT_STAT:
+                case AuraType.SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+                    rtb.Append((UnitMods)miscA);
+                    break;
+                case AuraType.SPELL_AURA_MOD_COMBAT_RATING_FROM_COMBAT_RATING:
                 case AuraType.SPELL_AURA_MOD_RATING:
                 case AuraType.SPELL_AURA_MOD_RATING_PCT:
-                    rtb.Append((CombatRating)misc);
+                    rtb.Append((CombatRatingMask)miscA);
                     break;
                 case AuraType.SPELL_AURA_ADD_FLAT_MODIFIER:
                 case AuraType.SPELL_AURA_ADD_PCT_MODIFIER:
-                case AuraType.SPELL_AURA_ADD_PCT_MODIFIER_BY_SPELL_LABEL:
-                case AuraType.SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL:
-                    rtb.Append((SpellModOp)misc);
+                    rtb.Append((SpellModOp)miscA);
                     break;
                 // TODO: more case
                 default:
-                    rtb.Append(misc);
+                    rtb.Append(miscA);
                     break;
             }
 
-            rtb.AppendFormat("), miscB = {0}", effect.EffectMiscValue[1]);
-            rtb.AppendFormatLine(", amplitude = {0}, periodic = {1}", effect.EffectAmplitude, effect.EffectAuraPeriod);
+            rtb.AppendFormat("), miscB = {0} (", effect.EffectMiscValue[1]);
+            switch (aura)
+            {
+                case AuraType.SPELL_AURA_CONVERT_CONSUMED_RUNE:
+                case AuraType.SPELL_AURA_CONVERT_RUNE:
+                    rtb.Append((RuneType)miscB);
+                    break;
+                case AuraType.SPELL_AURA_MOD_POWER_COST_SCHOOL:
+                case AuraType.SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
+                    rtb.Append((PowerMask)miscB);
+                    break;
+                case AuraType.SPELL_AURA_MOD_COMBAT_RATING_FROM_COMBAT_RATING:
+                    rtb.Append((CombatRatingMask)miscB);
+                    break;
+                // TODO: more case
+                default:
+                    rtb.Append(miscB);
+                    break;
+            }
+
+            rtb.AppendFormatLine("), amplitude = {0}, periodic = {1}", effect.EffectAmplitude, effect.EffectAuraPeriod);
 
             switch (aura)
             {
                 case AuraType.SPELL_AURA_OVERRIDE_SPELLS:
-                    if (!DBC.DBC.OverrideSpellData.ContainsKey(misc))
+                    if (!DBC.DBC.OverrideSpellData.ContainsKey(miscA))
                     {
                         rtb.SetStyle(Color.Red, FontStyle.Bold);
-                        rtb.AppendFormatLine("Cannot find key {0} in OverrideSpellData.dbc", (uint)misc);
+                        rtb.AppendFormatLine("Cannot find key {0} in OverrideSpellData.dbc", (uint)miscA);
                     }
                     else
                     {
                         rtb.AppendLine();
                         rtb.SetStyle(Color.DarkRed, FontStyle.Bold);
-                        var @override = DBC.DBC.OverrideSpellData[misc];
+                        var @override = DBC.DBC.OverrideSpellData[miscA];
                         for (var i = 0; i < 10; ++i)
                         {
                             if (@override.Spells[i] == 0)
@@ -947,7 +996,7 @@ namespace SpellWork.Spell
                 case AuraType.SPELL_AURA_SCREEN_EFFECT:
                     rtb.SetStyle(Color.DarkBlue, FontStyle.Bold);
                     rtb.AppendFormatLine("ScreenEffect: {0}",
-                        DBC.DBC.ScreenEffect.ContainsKey(misc) ? DBC.DBC.ScreenEffect[misc].Name : "?????");
+                        DBC.DBC.ScreenEffect.ContainsKey(miscA) ? DBC.DBC.ScreenEffect[miscA].Name : "?????");
                     break;
             }
         }
@@ -1046,18 +1095,16 @@ namespace SpellWork.Spell
             return SpellEffectInfoStore.Any(eff => eff.SpellEffect != null && eff.SpellEffect.ImplicitTarget[1] == (uint)target);
         }
 
-        private uint? GetSpellLabelAffectingOtherSpells(SpellEffectEntry effect)
+        private int? GetSpellLabelAffectingOtherSpells(SpellEffectEntry effect)
         {
             switch ((AuraType)effect.EffectAura)
             {
-                case AuraType.SPELL_AURA_MOD_RECOVERY_RATE_BY_SPELL_LABEL:
-                case AuraType.SPELL_AURA_SUPPRESS_ITEM_PASSIVE_EFFECT_BY_SPELL_LABEL:
                 case AuraType.SPELL_AURA_CAST_WHILE_WALKING_BY_SPELL_LABEL:
                 case AuraType.SPELL_AURA_MOD_AURA_TIME_RATE_BY_SPELL_LABEL:
-                    return (uint)effect.EffectMiscValue[0];
-                case AuraType.SPELL_AURA_ADD_PCT_MODIFIER_BY_SPELL_LABEL:
-                case AuraType.SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL:
-                    return (uint)effect.EffectMiscValue[1];
+                    return effect.EffectMiscValue[0];
+                //case AuraType.SPELL_AURA_ADD_PCT_MODIFIER_BY_SPELL_LABEL:
+                //case AuraType.SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL:
+                    //return effect.EffectMiscValue[1];
             }
             return null;
         }
@@ -1069,7 +1116,7 @@ namespace SpellWork.Spell
         public SpellEffectEntry SpellEffect { get; set; }
 
         [IgnoreAutopopulatedFilterValue("Not useful")]
-        public uint ID => SpellEffect.ID;
+        public int ID => SpellEffect.ID;
 
         [IgnoreAutopopulatedFilterValue("Filter using ID field on SpellInfo instead")]
         public int SpellID => SpellEffect.SpellID;

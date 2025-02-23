@@ -10,7 +10,7 @@ namespace SpellWork.DBC.Structures
         public string HordeDisplayName;
         public string OverrideSourceInfoDisplayName;
         [Index(false)]
-        public uint ID;
+        public int ID;
         public sbyte CategoryID;
         public int SpellIconFileID;
         public sbyte CanLink;
@@ -18,7 +18,5 @@ namespace SpellWork.DBC.Structures
         public int ParentTierIndex;
         public ushort Flags;
         public int SpellBookSpellID;
-        public int ExpansionNameSharedStringID;
-        public int HordeExpansionNameSharedStringID;
     }
 }
